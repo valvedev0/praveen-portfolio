@@ -1,103 +1,106 @@
 <html lang="en-us"><script src="https://pygame-web.github.io/cdn/0.9.3/pythons.js" type=module id="site" data-python="python3.12" data-LINES=42 data-COLUMNS=132 data-os="vtx,snd,gui" async defer>#<!--
 
 print("""
-Loading Simulation Launcher
+Loading Simulation Launcher from python.apk
     Pygbag Version : 0.9.3
+    Template Version : 0.9.3
     Python  : 3.12
     CDN URL : https://pygame-web.github.io/cdn/0.9.3/
     Screen  : 1280x720
     Title   : Simulation Launcher
+    Folder  : python
+    Authors : pgw
+    SPDX-License-Identifier: cookiecutter.spdx
+
 """)
 
 import sys
 import asyncio
 import platform
+import json
 from pathlib import Path
 
 # do not rename
 async def custom_site():
     import embed
-    platform.document.body.style.background = "#1a1a1a"
-    platform.window.transfer.hidden = True
+    platform.document.body.style.background = "#7f7f7f"
+
+    platform.window.transfer.hidden = true
     platform.window.canvas.style.visibility = "visible"
 
-    # Wait for the page to be ready
-    while embed.counter() < 0:
+
+    bundle = "python"
+
+    # the C or js loader could do that but be explicit.
+    appdir = Path(f"/data/data/{bundle}") # /data/data/python
+    appdir.mkdir()
+
+
+    # unpack filesystem from compressed archive into work dir
+    if platform.window.location.host.find('.itch.zone')>0:
+        import zipfile
+        async with platform.fopen("python.apk", "rb") as archive:
+            with zipfile.ZipFile(archive) as zip_ref:
+                zip_ref.extractall(appdir.as_posix())
+    else:
+        import tarfile
+        async with platform.fopen("python.tar.gz", "rb") as archive:
+            tar = tarfile.open(fileobj=archive, mode="r:gz")
+            tar.extractall(path=appdir.as_posix(), filter='tar')
+            tar.close()
+
+    # preloader will change to work dir and prepend it to sys.path
+    platform.run_main(PyConfig, loaderhome= appdir / "assets", loadermain=None)
+
+
+    # wait preloading complete : that includes images and wasm compilation of bundled modules
+    while embed.counter()<0:
         await asyncio.sleep(.1)
 
-    # Start the top-level async handler
-    await TopLevel_async_handler.start_toplevel(platform.shell, console=False)
+    main = appdir / "assets" / "main.py"
 
-    # Load and run main.py
-    try:
-        main_code = """
-import pygame
-import sys
+    # TODO: test for window.webkitAudioContext and block aio loop until gesture if accessing media manager play
+    # before a gesture is recorded ( touch or click )
 
-pygame.init()
-WIDTH, HEIGHT = 1280, 720
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Python Simulation Launcher")
+    # test/wait user media interaction
+    if not platform.window.MM.UME:
 
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-BLUE = (100, 150, 255)
-GRAY = (200, 200, 200)
+        # now that apk is mounted we have access to font cache
+        # but we need to fill __file__ that is not yet set
+        __import__(__name__).__file__ = main
 
-font_large = pygame.font.Font(None, 48)
-font_medium = pygame.font.Font(None, 32)
-font_small = pygame.font.Font(None, 24)
+        # now make a prompt
+        msg  = "Ready to start ! Please click/touch page"
+        platform.window.infobox.innerText = msg
+        print("\n"*4, f"    * Waiting for media user engagement. {msg} *" , "\n"*4)
 
-clock = pygame.time.Clock()
+        while not platform.window.MM.UME:
+            await asyncio.sleep(.1)
 
-def draw_text(surface, text, font, color, pos):
-    text_surface = font.render(text, True, color)
-    surface.blit(text_surface, pos)
+    # start async top level machinery if not started and add a console in any case if requested.
+    await TopLevel_async_handler.start_toplevel(platform.shell, console=window.python.config.debug)
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
-    
-    screen.fill(BLACK)
-    
-    draw_text(screen, "Python Simulation Launcher", font_large, BLUE, (50, 50))
-    
-    simulations = [
-        "1. N-Body Gravity Simulation",
-        "2. Particle System",
-        "3. Wave Simulation",
-        "4. Cellular Automata",
-    ]
-    
-    y_offset = 150
-    for sim in simulations:
-        draw_text(screen, sim, font_medium, WHITE, (100, y_offset))
-        y_offset += 80
-    
-    draw_text(screen, "Press ESC to exit", font_small, GRAY, (50, 650))
-    
-    pygame.display.flip()
-    clock.tick(60)
+    # now that apk is mounted we have access to font cache
+    # but we need to fill __file__/__name__ that are not yet set
+    __import__(__name__).__file__ = main
 
-pygame.quit()
-"""
-        exec(main_code)
-    except Exception as e:
-        print(f"Error running simulation: {e}")
-        import traceback
-        traceback.print_exc()
+
+    def ui_callback(pkg):
+        platform.window.infobox.innerText = f"installing {pkg}"
+
+    await shell.source(main, callback=ui_callback)
+
+    # if you don't reach that step
+    # your main.py has an infinite sync loop somewhere !
 
     platform.window.infobox.style.display = "none"
     platform.window.config.gui_divider = 1
     platform.window.window_resize()
-    print("Simulation Launcher started successfully")
+    print("default.tmpl: done")
 
-asyncio.run(custom_site())
+    shell.interactive()
+
+asyncio.run( custom_site() )
 
 
 
