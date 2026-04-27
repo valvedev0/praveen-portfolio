@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laser Puzzle</title>
+  <meta
+    name="description"
+    content="A simple reflection puzzle where you clear green targets while avoiding red hazard drones."
+  >
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="masthead">
+      <div class="masthead-copy">
+        <p class="kicker">Interactive Simulation</p>
+        <h1>Laser Puzzle</h1>
+        <p class="lede">A simple reflection puzzle where you clear green targets while avoiding red hazard drones.</p>
+      </div>
+    </header>
+
+    <section class="info-grid" aria-label="How to play and objective">
+      <article class="info-card">
+        <h2>How to Play</h2>
+        <ul>
+            <li>Move the pointer to aim the laser pulse.</li>
+            <li>Click inside the arena to move the emitter.</li>
+            <li>Keep the emitter outside the green safety circles around each target.</li>
+            <li>Use mirror reflections to hit the green targets.</li>
+            <li>Avoid the moving red drones because hitting one loses the round.</li>
+            <li>The safety circles grow and the beam pulse slows down as the level increases.</li>
+            <li>Clear the board before the timer reaches zero.</li>
+        </ul>
+      </article>
+
+      <article class="info-card">
+        <h2>Objective</h2>
+        <p>Use mirror reflections to hit every green target. Each target disappears on contact, the sidebar updates immediately, and touching a red drone with the reflected beam ends the round.</p>
+      </article>
+    </section>
+
+    <section class="sim-card">
+      <canvas
+        id="gameCanvas"
+        width="1180"
+        height="650"
+        aria-label="Laser Puzzle simulation"
+      ></canvas>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

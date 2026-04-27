@@ -1,87 +1,166 @@
-<html lang="en-us"><script src="https://pygame-web.github.io/cdn/0.9.3/pythons.js" type=module id="site" data-python="python3.12" data-LINES=42 data-COLUMNS=132 data-os="vtx,snd,gui" async defer>#</script><head><script type="application/javascript">
-// END BLOCK
-
-config = {
-    xtermjs : "1" ,
-    _sdl2 : "canvas",
-    user_canvas : 0,
-    user_canvas_managed : 0,
-    gui_divider : 2,
-    ume_block : 1,
-    can_close : 0,
-    archive : "python",
-    gui_debug : 2,
-    cdn : "https://pygame-web.github.io/cdn/0.9.3/",
-    autorun : 0,
-    PYBUILD : "3.12",
-    fb_ar   :  1.77,
-    fb_width : "1280",
-    fb_height : "720"
-}
-
-function show_infobox() {
-    if (typeof infobox !== 'undefined') {
-        infobox.style.display = "block";
-        const w = infobox.offsetWidth;
-        const h = infobox.offsetHeight;
-        const left = (window.innerWidth - w) / 2;
-        const top = (window.innerHeight - h) / 2;
-        infobox.style.left = left + "px";
-        infobox.style.top = top + "px";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Python Simulations</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    body {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
     }
-}
-</script>
-
-    <title>Simulation Launcher</title>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
-
-    <script src="https://cdn.jsdelivr.net/gh/gzuidhof/coi-serviceworker@master/coi-serviceworker.min.js"></script>
-    <script src="https://pygame-web.github.io/cdn/0.9.3/browserfs.min.js"></script>
-
-    <style>
-        #status { display: inline-block; vertical-align: top; margin-top: 20px; margin-left: 30px; font-weight: bold; color: rgb(120, 120, 120); }
-        #progress { height: 20px; width: 300px; }
-        #infobox { position: fixed; background: #2b2b2b; color: white; font-weight: bold; padding: 12px 24px; border: 1px solid white; z-index: 999999; }
-        div.emscripten { text-align: center; }
-        div.emscripten_border { border: 1px solid black; }
-        canvas.emscripten { border: 0px none; background-color: transparent; width: 100%; height: 100%; z-index: 5; padding: 0; margin: 0 auto; position: absolute; top: 0; left: 0; right: 0; bottom: 0;}
-        body { font-family: arial; margin: 0; padding: none; background-color: #fdfbe5; }
-    </style>
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      text-decoration: none;
+      color: var(--ink);
+      font-family: var(--mono);
+      border: 1px solid var(--ink);
+      padding: 0.5rem 1rem;
+      transition: all 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: var(--ink);
+      color: var(--paper);
+    }
+    .header {
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+    .header h1 {
+      font-family: var(--serif);
+      font-size: 2.5rem;
+      letter-spacing: 0.05em;
+      margin: 0 0 0.5rem 0;
+    }
+    .header p {
+      font-family: var(--mono);
+      color: var(--muted);
+      margin: 0;
+    }
+    .simulations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .simulation-card {
+      border: 2px solid var(--ink);
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .simulation-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      background-color: var(--paper-light);
+    }
+    .simulation-card h3 {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      margin: 0 0 0.5rem 0;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 0.5rem;
+    }
+    .simulation-card p {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin: 0.5rem 0 0 0;
+      line-height: 1.6;
+      flex-grow: 1;
+    }
+    .simulation-card .launch-btn {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--ink);
+      background-color: transparent;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+    .simulation-card .launch-btn:hover {
+      background-color: var(--ink);
+      color: var(--paper);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+    .empty-state p {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+  </style>
 </head>
-
 <body>
-    <div id="transfer" align=center>
-        <div class="emscripten" id="status">Downloading...</div>
-        <div class="emscripten">
-            <progress value="0" max="100" id="progress"></progress>
-        </div>
-    </div>
+  <a href="../index.html" class="back-link">← Back to Portfolio</a>
+  
+  <div class="header">
+    <h1>Python Simulations</h1>
+    <p>Interactive simulations built with Python, Pygame, and Pygbag</p>
+  </div>
 
-    <canvas class="emscripten" id="canvas" width="1px" height="1px" oncontextmenu="event.preventDefault()" tabindex=1></canvas>
-    <canvas class="emscripten" id="canvas3d" width="1280px" height="720px" oncontextmenu="event.preventDefault()" tabindex=1 hidden></canvas>
+  <div class="simulations-grid" id="simulations-container">
+    <!-- Simulations will be populated here -->
+  </div>
 
-    <div id="infobox">Loading, please wait ...</div>
-    <div id=html></div>
+  <script>
+    // Define available simulations
+    const simulations = [
+      {
+        id: 'laser_sim',
+        title: 'Laser Simulation',
+        description: 'Optical physics simulation demonstrating laser behavior, refraction, and diffraction.',
+        icon: '🔦'
+      },
+      {
+        id: 'agent_sim',
+        title: 'Agent Simulation',
+        description: 'Autonomous agents interacting in a virtual environment with emergent behavior.',
+        icon: '🐜'
+      },
+      {
+        id: 'particle_sim',
+        title: 'Particle System',
+        description: 'Dynamic particle effects and collision simulation.',
+        icon: '✨'
+      }
+    ];
 
-    <div id="pyconsole">
-        <div id="terminal" tabIndex=1 align="left"></div>
-    </div>
+    function renderSimulations() {
+      const container = document.getElementById('simulations-container');
+      
+      if (simulations.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>No simulations available yet.</p>
+            <p>Add simulation folders to get started.</p>
+          </div>
+        `;
+        return;
+      }
 
-    <script type="application/javascript">
-    globalThis.__canvas_resized = (self, ecw, ech) => { console.warn("TODO: panda3d canvas monitor", self, ecw, ech) }
-    
-    async function custom_onload(debug_hidden) {
-        console.log(__FILE__, "custom_onload")
-        pyconsole.hidden = debug_hidden
-        transfer.hidden = debug_hidden
-        show_infobox()
+      container.innerHTML = simulations.map(sim => `
+        <a href="${sim.id}/index.html" class="simulation-card">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">${sim.icon}</div>
+          <h3>${sim.title}</h3>
+          <p>${sim.description}</p>
+          <button class="launch-btn">Launch →</button>
+        </a>
+      `).join('');
     }
-    
-    function custom_prerun() { console.log(__FILE__, "custom_prerun") }
-    function custom_postrun() { console.log(__FILE__, "custom_postrun") }
-    </script>
+
+    // Render on load
+    renderSimulations();
+  </script>
 </body>
 </html>
