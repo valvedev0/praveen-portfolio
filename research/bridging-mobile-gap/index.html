@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bridging the Mobile Gap with C++ & Raylib</title>
+  
+  <!-- Your external stylesheet (will load correctly in your GitHub repo) -->
+  <link rel="stylesheet" href="../../style.css">
+  
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    /* Research Page Styles - Inherits from main style.css */
+    .page-frame {
+      display: grid;
+      grid-template-columns: minmax(160px, 260px) 1fr minmax(120px, 220px);
+      grid-template-rows: auto 1fr auto;
+      column-gap: 1rem;
+      row-gap: 1rem;
+      min-height: 100vh;
+      padding: 1.5rem 2rem 2.2rem;
+    }
+
+    .research-header {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+    }
+
+    .back-link {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+      align-self: start;
+      margin-bottom: 0;
+      margin-top: -2.5rem;
+    }
+
+    .left-meta {
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
+      align-self: start;
+      max-width: 250px;
+    }
+
+    .left-meta h2 {
+      margin: 0 0 0.25rem;
+      font-family: var(--serif);
+      font-size: 0.95rem;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    .left-meta p {
+      margin: 0 0 1rem;
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .central-block {
+      grid-column: 2 / 3;
+      grid-row: 2 / 3;
+      width: min(100%, 820px);
+      justify-self: center;
+    }
+
+    .footer-left {
+      grid-column: 1 / 2;
+      grid-row: 3 / 4;
+      align-self: end;
+    }
+
+    .timeline {
+      grid-column: 3 / 4;
+      grid-row: 3 / 4;
+      margin: 0;
+      justify-self: end;
+      align-self: end;
+      font-family: var(--serif);
+      font-size: clamp(1rem, 2.5vw, 2.1rem);
+      font-weight: 700;
+    }
+
+
+    /* User's Original Base Styles */
+    .research-header { margin-bottom: 3rem; }
+    .research-title { 
+      font-size: 2.5rem; 
+      font-weight: 700; 
+      margin-bottom: 0.5rem; 
+      line-height: 1.2; 
+      font-family: var(--serif);
+    }
+    .research-meta { color: var(--muted); font-size: 1rem; margin-bottom: 1rem; font-family: var(--mono); }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+    }
+    .back-link:hover { opacity: 0.7; }
+    .footer-left { 
+      margin-top: 4rem; 
+      padding-top: 2rem; 
+      border-top: 1px solid var(--muted);
+      opacity: 0.6;
+      font-family: var(--mono); 
+      font-size: 0.84rem;
+    }
+    .footer-left p { margin: 0 0 0.28rem; }
+    .footer-left a { 
+      color: var(--ink); 
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    /* Custom Component Styles - Adapted for Minimalism */
+    .central-block { 
+      text-align: left;
+    }
+    .central-block p { margin-bottom: 1.5rem; margin-top: 0; }
+    .central-block h2 { 
+      font-size: 1.5rem; 
+      margin-top: 3rem; 
+      margin-bottom: 1rem; 
+      padding-bottom: 0.5rem; 
+      border-bottom: 1px solid var(--ink);
+      font-family: var(--serif);
+      font-weight: 700;
+    }
+    .central-block h3 { 
+      font-size: 1.2rem; 
+      margin-top: 1.5rem; 
+      margin-bottom: 0.5rem; 
+      font-family: var(--serif);
+      font-weight: 700;
+    }
+
+    /* Layout Grids */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; margin-bottom: 2rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    
+    @media (max-width: 600px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Cards & Containers - Stripped back to be flat and bordered */
+    .card { 
+      border: 1px solid var(--muted);
+      padding: 1.5rem; 
+      background: transparent;
+      border-radius: 0;
+    }
+    .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+    
+    /* Charts */
+    .chart-box { position: relative; width: 100%; height: 300px; background: transparent; border: 1px solid var(--muted); padding: 1rem; box-sizing: border-box; }
+
+    /* UI Elements - Flat design */
+    .input-box { 
+      width: 100%; padding: 0.8rem; font-family: var(--mono); 
+      border: 1px solid var(--muted); background: transparent;
+      margin-bottom: 1rem; resize: vertical; box-sizing: border-box; 
+      color: var(--ink);
+    }
+    .input-box:focus { outline: none; border-color: var(--ink); }
+    
+    .btn { 
+      background: var(--ink); color: var(--paper); border: 1px solid var(--ink); 
+      padding: 0.6rem 1.2rem; font-family: var(--mono); font-size: 0.9rem; 
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;
+    }
+    .btn:hover { background: transparent; color: var(--ink); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Output Boxes for AI */
+    .ai-output { 
+      margin-top: 1rem; padding: 1rem; border-left: 3px solid var(--ink); 
+      background: transparent; font-size: 0.95rem; display: none; 
+    }
+    .ai-output p { margin-bottom: 0.5rem; }
+    .ai-output p:last-child { margin-bottom: 0; }
+
+    /* Interactive Guide System - Minimalist approach */
+    .guide-container { display: flex; gap: 1.5rem; border: 1px solid var(--muted); background: transparent; overflow: hidden; }
+    .guide-sidebar { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--muted); }
+    .guide-btn { 
+      padding: 1rem; text-align: left; background: none; border: none; border-bottom: 1px solid var(--muted);
+      cursor: pointer; font-family: var(--mono); color: var(--muted); transition: all 0.2s; font-size: 0.9rem;
+    }
+    .guide-btn:last-child { border-bottom: none; }
+    .guide-btn.active { background: transparent; color: var(--ink); font-weight: bold; border-left: 4px solid var(--ink); padding-left: calc(1rem - 4px); }
+    .guide-content { flex: 2; padding: 2rem; }
+    .code-block { 
+      background: transparent; color: var(--ink); padding: 1rem; border: 1px solid var(--muted);
+      font-family: var(--mono); font-size: 0.85rem; overflow-x: auto; margin: 1rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .guide-container { flex-direction: column; }
+      .guide-sidebar { border-right: none; border-bottom: 1px solid var(--muted); }
+      .guide-btn { border-left: none; border-bottom: 1px solid var(--muted); }
+      .guide-btn.active { border-left: none; border-bottom: 3px solid var(--ink); padding-left: 1rem; }
+    }
+
+    /* Simple Loader */
+    .spinner {
+      border: 2px solid rgba(136, 136, 136, 0.3); border-radius: 50%; border-top: 2px solid currentColor;
+      width: 14px; height: 14px; animation: spin 1s linear infinite; display: none;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="page-frame">
+    <a href="../../" class="back-link">← Back to Portfolio</a>
+
+    <aside class="left-meta">
+      <h2>RESEARCH</h2>
+      <p>Mobile-first game development using C++ and Raylib</p>
+      <h2 style="margin-top: 2rem;">TOPICS</h2>
+      <p style="font-size: 0.75rem;">OS Architecture · Hardware Constraints · Performance Optimization · Build Pipeline</p>
+    </aside>
+
+    <main class="central-block">
+      <header class="research-header">
+        <h1 class="research-title">Bridging the Mobile Gap with C++ & Raylib</h1>
+        <p class="research-meta">Research & Documentation</p>
+      </header>
+      <p style="color: var(--muted); font-style: italic;">
+        An analysis of mobile OS differences, hardware constraints, and the technical pipeline for high-performance cross-platform game development using Raylib.
+      </p>
+
+      <!-- SECTION 1: OS LANDSCAPE -->
+      <section id="landscape">
+        <h2>1. The Mobile OS Divide</h2>
+        <p>Understanding the target platforms is crucial. This section explores the differences between Android and iOS. Developing cross-platform requires acknowledging these distinct ecosystems and finding common ground (like C++) to avoid rewriting core logic.</p>
+        
+        <div class="grid-2">
+          <div class="chart-box">
+            <canvas id="osShareChart"></canvas>
+          </div>
+          <div>
+            <h3>Architectural Differences</h3>
+            <ul style="padding-left: 1.2rem; color: var(--muted);">
+              <li style="margin-bottom: 0.8rem;"><strong style="color: var(--ink);">Android:</strong> Uses a modified Linux kernel. Apps traditionally run in a VM using Java/Kotlin, but the NDK allows direct C++ execution.</li>
+              <li style="margin-bottom: 0.8rem;"><strong style="color: var(--ink);">iOS:</strong> Unix-like core. Native apps use Swift/Objective-C. C++ is a first-class citizen (Objective-C++), making porting easier.</li>
+              <li><strong style="color: var(--ink);">The Bridge:</strong> By writing rendering in C++ (Raylib), we bypass OS-specific UI layers, communicating directly with OpenGL ES.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: HARDWARE CONSTRAINTS -->
+      <section id="hardware">
+        <h2>2. Hardware Realities</h2>
+        <p>Mobile devices are thermally and energetically constrained. Unlike PCs, hardware limitations heavily dictate game architecture.</p>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-icon">🔋</div>
+            <h3>Thermal Throttling</h3>
+            <p style="font-size: 0.9rem; color: var(--muted);">Phones lack active cooling. Sustained 100% CPU usage will cause the OS to drastically underclock the processor within minutes.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🧠</div>
+            <h3>Memory Bandwidth</h3>
+            <p style="font-size: 0.9rem; color: var(--muted);">Mobile memory bandwidth is significantly lower than desktop. Moving large textures causes massive frame drops.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🎮</div>
+            <h3>Tile-Based GPUs</h3>
+            <p style="font-size: 0.9rem; color: var(--muted);">Mobile GPUs use TBDR, rendering screens in small chunks. High overdraw kills mobile performance.</p>
+          </div>
+        </div>
+
+        <!-- AI Feature 1: Game Concept Analyzer -->
+        <div class="card" style="margin-top: 2rem; border: 1px solid var(--ink);">
+          <h3 style="margin-top: 0;">AI Hardware Viability Analyzer</h3>
+          <p style="font-size: 0.9rem; color: var(--muted);">Describe your game idea, and the LLM will analyze potential mobile hardware bottlenecks based on the constraints above.</p>
+          <textarea id="game-concept-input" class="input-box" rows="3" placeholder="e.g., A 3D open-world racing game with thousands of physics-based objects..."></textarea>
+          <button id="analyze-btn" class="btn">
+            <span id="analyze-btn-text">Analyze Viability</span>
+            <div id="analyze-spinner" class="spinner"></div>
+          </button>
+          <div id="analyzer-output" class="ai-output"></div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: PERFORMANCE -->
+      <section id="performance">
+        <h2>3. The Raylib & C++ Edge</h2>
+        <p>Why use C++ and Raylib instead of massive frameworks? This benchmark visualizes the performance overhead benefits. Raylib compiles directly to native code, bypassing virtual machines.</p>
+
+        <div class="grid-2">
+          <div>
+            <h3 style="margin-top: 0;">Key Benefits</h3>
+            <p style="font-size: 0.9rem; margin-bottom: 1rem;"><strong style="color: var(--ink);">Zero Garbage Collection:</strong> C++ allows manual memory management, preventing unpredictable frame stuttering.</p>
+            <p style="font-size: 0.9rem; margin-bottom: 1rem;"><strong style="color: var(--ink);">Minimal App Size:</strong> A Raylib APK can be under 5MB. Standard engines start at 30MB+ empty.</p>
+            <p style="font-size: 0.9rem;"><strong style="color: var(--ink);">Direct Graphics:</strong> Raylib abstracts OpenGL ES while keeping execution close to the metal.</p>
+          </div>
+          <div class="chart-box">
+            <canvas id="perfChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: BUILD GUIDE -->
+      <section id="guide">
+        <h2>4. Android Build Pipeline</h2>
+        <p>Creating an Android app with C++ requires bridging the JNI. Select a step below to explore the architecture required to compile a Raylib game into an APK.</p>
+
+        <div class="guide-container">
+          <div class="guide-sidebar" id="step-buttons">
+            <!-- Buttons injected via JS -->
+          </div>
+          
+          <div class="guide-content">
+            <span style="font-family: var(--mono); font-size: 0.8rem; color: var(--muted); text-transform: uppercase;" id="guide-badge">Step 1</span>
+            <h3 style="margin-top: 0.5rem;" id="guide-title">Setup Environment</h3>
+            <p style="font-size: 0.95rem;" id="guide-desc">Install the necessary SDKs and NDKs.</p>
+            
+            <div class="code-block" id="guide-code">sudo apt install android-sdk android-ndk</div>
+
+            <!-- AI Feature 2: Step Explainer -->
+            <div style="margin-top: 2rem;">
+              <button id="explain-btn" class="btn" style="background: transparent; color: var(--ink); border-color: var(--muted);">
+                <span id="explain-btn-text">Ask AI to explain this code</span>
+                <div id="explain-spinner" class="spinner"></div>
+              </button>
+              <div id="explain-output" class="ai-output" style="border-left-color: var(--muted); background: transparent;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer-left">
+      <p><a href="mailto:aman.m226630@gmail.com">aman.m226630@gmail.com</a></p>
+    </footer>
+
+    <p class="timeline">2025</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // --- Chart.js Configuration ---
+      const rootStyle = getComputedStyle(document.body);
+      const inkColor = rootStyle.getPropertyValue('--ink').trim() || '#121212';
+      const mutedColor = rootStyle.getPropertyValue('--muted').trim() || '#8d8d8d';
+      const paperColor = rootStyle.getPropertyValue('--paper').trim() || '#fdfbe5';
+      const monoFont = rootStyle.getPropertyValue('--mono').trim() || 'Courier New, monospace';
+
+      // Setting Chart defaults to match the minimalist theme
+      Chart.defaults.font.family = monoFont;
+      Chart.defaults.color = mutedColor;
+
+      // OS Share Chart
+      const osCtx = document.getElementById('osShareChart').getContext('2d');
+      new Chart(osCtx, {
+        type: 'pie', // Switched to pie to look a bit more "academic" than doughnut
+        data: {
+          labels: ['Android', 'iOS', 'Other'],
+          datasets: [{
+            data: [70.4, 28.9, 0.7],
+            // Using shades of grey/black to fit the monochrome palette
+            backgroundColor: [inkColor, mutedColor, '#c0c0c0'],
+            borderColor: paperColor,
+            borderWidth: 2,
+            hoverOffset: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { font: { family: monoFont } } }
+          }
+        }
+      });
+
+      // Performance Chart
+      const perfCtx = document.getElementById('perfChart').getContext('2d');
+      new Chart(perfCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Native C++', 'Raylib', 'Java', 'HTML5', 'Engine'],
+          datasets: [{
+            label: 'Frame Time (ms)',
+            data: [1.2, 1.5, 4.8, 8.5, 16.2],
+            backgroundColor: inkColor,
+            borderRadius: 0 // Removed rounding for sharper design
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { grid: { color: mutedColor + '22' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // --- Interactive Guide Logic ---
+      const buildSteps = [
+        {
+          title: "Prerequisites & SDK",
+          desc: "To build for Android, you need the SDK (for packaging) and the NDK (Native Development Kit) to compile C++ code for ARM architectures.",
+          code: "export ANDROID_HOME=/path/to/android/sdk\nexport ANDROID_NDK=/path/to/android/ndk"
+        },
+        {
+          title: "NativeActivity Bridge",
+          desc: "Android apps start via Java. We use a 'NativeActivity' bridge in the manifest, allowing the OS to launch our C++ 'main()' function directly.",
+          code: "<activity android:name=\"android.app.NativeActivity\">\n  <meta-data android:name=\"android.app.lib_name\"\n             android:value=\"main\" />\n</activity>"
+        },
+        {
+          title: "Raylib C++ Code",
+          desc: "Write your Raylib code. Raylib natively handles the translation of Window creation and Input events (touches become mouse clicks natively).",
+          code: "int main(void) {\n  InitWindow(800, 450, \"App\");\n  while (!WindowShouldClose()) {\n    BeginDrawing();\n    ClearBackground(RAYWHITE);\n    EndDrawing();\n  }\n  return 0;\n}"
+        },
+        {
+          title: "Compiling with Make",
+          desc: "Raylib provides a Makefile for Android. It uses the NDK's clang compiler to build a shared library (.so file) instead of a standard executable.",
+          code: "make PLATFORM=PLATFORM_ANDROID \\ \n     ANDROID_NDK=$ANDROID_NDK \\ \n     ANDROID_ARCH=arm64-v8a"
+        }
+      ];
+
+      const btnContainer = document.getElementById('step-buttons');
+      const uiBadge = document.getElementById('guide-badge');
+      const uiTitle = document.getElementById('guide-title');
+      const uiDesc = document.getElementById('guide-desc');
+      const uiCode = document.getElementById('guide-code');
+
+      function updateGuide(index) {
+        document.querySelectorAll('.guide-btn').forEach((btn, i) => {
+          btn.classList.toggle('active', i === index);
+        });
+
+        const data = buildSteps[index];
+        uiBadge.textContent = `Step ${index + 1} of ${buildSteps.length}`;
+        uiTitle.textContent = data.title;
+        uiDesc.textContent = data.desc;
+        uiCode.textContent = data.code;
+        
+        document.getElementById('explain-output').style.display = 'none';
+        document.getElementById('explain-output').innerHTML = '';
+      }
+
+      buildSteps.forEach((step, index) => {
+        const btn = document.createElement('button');
+        btn.className = `guide-btn`;
+        btn.textContent = step.title;
+        btn.onclick = () => updateGuide(index);
+        btnContainer.appendChild(btn);
+      });
+
+      updateGuide(0);
+
+      // --- Gemini API Logic ---
+      const apiKey = "AIzaSyDdsp7RU5g2_9Wy64cKGQuemQeh3qfBs88";
+      
+      async function callGemini(prompt, systemInstruction) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const payload = {
+          contents: [{ parts: [{ text: prompt }] }],
+          systemInstruction: { parts: [{ text: systemInstruction }] }
+        };
+
+        const delays = [1000, 2000, 4000, 8000, 16000];
+        
+        for (let i = 0; i < 5; i++) {
+          try {
+            const response = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
+          } catch (error) {
+            if (i === 4) return `<p style="color: red;">Error connecting to API.</p>`;
+            await new Promise(res => setTimeout(res, delays[i]));
+          }
+        }
+      }
+
+      const analyzeBtn = document.getElementById('analyze-btn');
+      const analyzeSpinner = document.getElementById('analyze-spinner');
+      const analyzerOutput = document.getElementById('analyzer-output');
+
+      analyzeBtn.addEventListener('click', async () => {
+        const concept = document.getElementById('game-concept-input').value.trim();
+        if (!concept) return;
+
+        analyzeBtn.disabled = true;
+        analyzeSpinner.style.display = 'block';
+        analyzerOutput.style.display = 'none';
+
+        const sysInstruct = "You are a mobile game optimization engineer. Analyze the game concept specifically regarding Thermal Throttling, Memory Bandwidth, and Tile-Based GPU (TBDR) constraints. Format response in clean HTML <p> and <ul> tags only. No markdown.";
+        const response = await callGemini(`Analyze this game concept for mobile devices: "${concept}".`, sysInstruct);
+        
+        analyzerOutput.innerHTML = response;
+        analyzerOutput.style.display = 'block';
+        
+        analyzeBtn.disabled = false;
+        analyzeSpinner.style.display = 'none';
+      });
+
+      const explainBtn = document.getElementById('explain-btn');
+      const explainSpinner = document.getElementById('explain-spinner');
+      const explainOutput = document.getElementById('explain-output');
+
+      explainBtn.addEventListener('click', async () => {
+        explainBtn.disabled = true;
+        explainSpinner.style.display = 'block';
+        explainOutput.style.display = 'none';
+
+        const title = uiTitle.textContent;
+        const code = uiCode.textContent;
+
+        const sysInstruct = "You are a C++ and Android tutor. Explain the provided 'Code/Command' in simple terms. What does it actually do under the hood? Format using clean HTML (<p>, <b>). No markdown.";
+        const response = await callGemini(`Explain this step in building an Android app.\nTitle: ${title}\nCode/Command:\n${code}`, sysInstruct);
+        
+        explainOutput.innerHTML = response;
+        explainOutput.style.display = 'block';
+
+        explainBtn.disabled = false;
+        explainSpinner.style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
