@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ant Simulation</title>
+  <meta
+    name="description"
+    content="Watch colonies of ants navigate obstacles and reach multiple colored targets using pathfinding and obstacle avoidance."
+  >
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="masthead">
+      <div class="masthead-copy">
+        <p class="kicker">Interactive Simulation</p>
+        <h1>Ant Simulation</h1>
+        <p class="lede">Watch colonies of ants navigate obstacles and reach multiple colored targets using pathfinding and obstacle avoidance.</p>
+      </div>
+    </header>
+
+    <section class="info-grid" aria-label="How to play and objective">
+      <article class="info-card">
+        <h2>How to Play</h2>
+        <ul>
+            <li>Ants automatically navigate toward their assigned colored targets.</li>
+            <li>Click in the arena to add new targets dynamically.</li>
+            <li>Press R to reset the entire simulation.</li>
+            <li>Press P to pause/resume the simulation.</li>
+            <li>Press T to toggle ant path visualization.</li>
+            <li>Watch the diagnostics panel to track arrival statistics.</li>
+            <li>Ants use seek, wander, and obstacle-avoidance behaviors.</li>
+        </ul>
+      </article>
+
+      <article class="info-card">
+        <h2>Objective</h2>
+        <p>Observe ants autonomously seek targets while avoiding obstacles. Click to add new targets. Use keyboard controls to pause, reset, or toggle path visualization.</p>
+      </article>
+    </section>
+
+    <section class="sim-card">
+      <canvas
+        id="gameCanvas"
+        width="1180"
+        height="650"
+        aria-label="Ant Simulation simulation"
+      ></canvas>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

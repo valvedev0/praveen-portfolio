@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Python Simulations</title>
+  <title>Python + Browser Simulations</title>
   <link rel="stylesheet" href="../style.css">
   <style>
     body {
@@ -11,89 +11,148 @@
       max-width: 1200px;
       margin: 0 auto;
     }
+
     .back-link {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
       margin-bottom: 2rem;
       text-decoration: none;
       color: var(--ink);
       font-family: var(--mono);
       border: 1px solid var(--ink);
-      padding: 0.5rem 1rem;
-      transition: all 0.3s ease;
+      padding: 0.65rem 1rem;
+      transition: all 0.2s ease;
     }
-    .back-link:hover {
+
+    .back-link:hover,
+    .back-link:focus-visible {
       background-color: var(--ink);
       color: var(--paper);
+      text-decoration: none;
     }
+
     .header {
-      margin-bottom: 3rem;
+      margin-bottom: 2.5rem;
       text-align: center;
     }
+
     .header h1 {
       font-family: var(--serif);
-      font-size: 2.5rem;
-      letter-spacing: 0.05em;
-      margin: 0 0 0.5rem 0;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      letter-spacing: 0.04em;
+      margin: 0 0 0.5rem;
     }
+
     .header p {
       font-family: var(--mono);
       color: var(--muted);
-      margin: 0;
+      margin: 0 auto;
+      max-width: 760px;
+      line-height: 1.7;
     }
+
     .simulations-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.4rem;
       margin-top: 2rem;
     }
+
     .simulation-card {
-      border: 2px solid var(--ink);
-      padding: 1.5rem;
+      border: 1px solid var(--ink);
+      padding: 1.25rem;
       text-decoration: none;
       color: inherit;
-      transition: all 0.3s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       display: flex;
       flex-direction: column;
+      gap: 0.7rem;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 42%),
+        rgba(253, 251, 229, 0.84);
+      box-shadow: 0 18px 36px -32px rgba(18, 18, 18, 0.72);
     }
-    .simulation-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-      background-color: var(--paper-light);
+
+    .simulation-card:hover,
+    .simulation-card:focus-visible {
+      transform: translateY(-3px);
+      box-shadow: 0 26px 44px -34px rgba(18, 18, 18, 0.74);
+      text-decoration: none;
     }
+
+    .simulation-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .simulation-icon {
+      width: 2.2rem;
+      height: 2.2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--ink);
+      font-family: var(--serif);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .simulation-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0.3rem 0.55rem;
+      border: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
     .simulation-card h3 {
       font-family: var(--serif);
-      font-size: 1.3rem;
-      margin: 0 0 0.5rem 0;
+      font-size: 1.25rem;
+      margin: 0;
       border-bottom: 1px solid var(--ink);
-      padding-bottom: 0.5rem;
+      padding-bottom: 0.55rem;
     }
+
     .simulation-card p {
       font-family: var(--mono);
       font-size: 0.9rem;
       color: var(--muted);
-      margin: 0.5rem 0 0 0;
-      line-height: 1.6;
+      margin: 0;
+      line-height: 1.65;
       flex-grow: 1;
     }
-    .simulation-card .launch-btn {
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
+
+    .launch-btn {
+      margin-top: 0.35rem;
+      padding: 0.78rem 1rem;
       border: 1px solid var(--ink);
       background-color: transparent;
       cursor: pointer;
       font-family: var(--mono);
       font-weight: 700;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
+      color: var(--ink);
     }
-    .simulation-card .launch-btn:hover {
+
+    .simulation-card:hover .launch-btn,
+    .simulation-card:focus-visible .launch-btn {
       background-color: var(--ink);
       color: var(--paper);
     }
+
     .empty-state {
       text-align: center;
       padding: 3rem 1rem;
       color: var(--muted);
     }
+
     .empty-state p {
       font-family: var(--mono);
       font-size: 0.95rem;
@@ -102,43 +161,49 @@
   </style>
 </head>
 <body>
-  <a href="../index.html" class="back-link">← Back to Portfolio</a>
-  
+  <a href="../index.html" class="back-link">&larr; Back to Portfolio</a>
+
   <div class="header">
-    <h1>Python Simulations</h1>
-    <p>Interactive simulations built with Python, Pygame, and Pygbag</p>
+    <h1>Python + Browser Simulations</h1>
+    <p>
+      A growing collection of interactive sims and browser experiments. Laser Sim, Flight Sim, and
+      Ant Sim are now live and can be launched directly from this page.
+    </p>
   </div>
 
-  <div class="simulations-grid" id="simulations-container">
-    <!-- Simulations will be populated here -->
-  </div>
+  <div class="simulations-grid" id="simulations-container"></div>
 
   <script>
-    // Define available simulations
     const simulations = [
       {
-        id: 'laser_sim',
-        title: 'Laser Simulation',
-        description: 'Optical physics simulation demonstrating laser behavior, refraction, and diffraction.',
-        icon: '🔦'
+        id: "laser_sim",
+        title: "Laser Simulation",
+        description: "Optical physics and laser behavior running as a browser-first interactive sim.",
+        status: "LIVE",
+        launchLabel: "Launch ->",
+        icon: "L"
       },
       {
-        id: 'agent_sim',
-        title: 'Agent Simulation',
-        description: 'Autonomous agents interacting in a virtual environment with emergent behavior.',
-        icon: '🐜'
+        id: "flight_sim",
+        title: "Flight Sim",
+        description: "A live browser build focused on flight behavior, control feel, and motion.",
+        status: "LIVE",
+        launchLabel: "Launch ->",
+        icon: "F"
       },
       {
-        id: 'particle_sim',
-        title: 'Particle System',
-        description: 'Dynamic particle effects and collision simulation.',
-        icon: '✨'
+        id: "ant_sim",
+        title: "Ant Sim",
+        description: "A live browser build exploring ant movement, interaction, and emergent behavior.",
+        status: "LIVE",
+        launchLabel: "Launch ->",
+        icon: "A"
       }
     ];
 
     function renderSimulations() {
-      const container = document.getElementById('simulations-container');
-      
+      const container = document.getElementById("simulations-container");
+
       if (simulations.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
@@ -149,17 +214,19 @@
         return;
       }
 
-      container.innerHTML = simulations.map(sim => `
-        <a href="${sim.id}/index.html" class="simulation-card">
-          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">${sim.icon}</div>
+      container.innerHTML = simulations.map((sim) => `
+        <a href="${sim.id}/index.html" target="_blank" rel="noreferrer" class="simulation-card">
+          <div class="simulation-meta">
+            <div class="simulation-icon" aria-hidden="true">${sim.icon}</div>
+            <div class="simulation-status">${sim.status}</div>
+          </div>
           <h3>${sim.title}</h3>
           <p>${sim.description}</p>
-          <button class="launch-btn">Launch →</button>
+          <button class="launch-btn" type="button">${sim.launchLabel}</button>
         </a>
-      `).join('');
+      `).join("");
     }
 
-    // Render on load
     renderSimulations();
   </script>
 </body>
