@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering SatnaOS: 32-Bit x86 Kernel from Bare Metal</title>
+  <link rel="icon" href="data:,">
+  
+  <!-- External stylesheet linking to portfolio root style.css -->
+  <link rel="stylesheet" href="../../style.css">
+  
+  <!-- Chart.js for architectural visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    /* In case opened standalone without ../../style.css present */
+    :root {
+      --paper: #fdfbe5;
+      --paper-deep: #f4efcf;
+      --ink: #121212;
+      --muted: #6d6a5f;
+      --line: rgba(18, 18, 18, 0.18);
+      --shadow: rgba(18, 18, 18, 0.08);
+      --mono: "Courier New", Courier, monospace;
+      --serif: "Rockwell", "Roboto Slab", "Bodoni MT", "Times New Roman", serif;
+    }
+
+    body {
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: var(--mono);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* Page Layout matching portfolio grid */
+    .page-frame {
+      display: grid;
+      grid-template-columns: minmax(160px, 260px) 1fr minmax(120px, 220px);
+      grid-template-rows: auto 1fr auto;
+      column-gap: 1.5rem;
+      row-gap: 1rem;
+      min-height: 100vh;
+      padding: 1.5rem 2rem 2.2rem;
+    }
+
+    .back-link {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+      align-self: start;
+      margin-top: -1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      display: inline-block;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 0.7; }
+
+    .left-meta {
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
+      align-self: start;
+      max-width: 250px;
+    }
+
+    .left-meta h2 {
+      margin: 0 0 0.25rem;
+      font-family: var(--serif);
+      font-size: 0.95rem;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 0.2rem;
+    }
+
+    .left-meta p {
+      margin: 0.4rem 0 1.5rem;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    .meta-tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .meta-tag {
+      font-size: 0.72rem;
+      border: 1px solid var(--line);
+      padding: 0.15rem 0.4rem;
+      background: rgba(18, 18, 18, 0.03);
+    }
+
+    .central-block {
+      grid-column: 2 / 3;
+      grid-row: 2 / 3;
+      width: min(100%, 840px);
+      justify-self: center;
+      text-align: left;
+    }
+
+    .research-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .research-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+      font-family: var(--serif);
+    }
+
+    .research-meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      font-family: var(--mono);
+    }
+
+    .abstract-box {
+      border-left: 3px solid var(--ink);
+      padding: 0.8rem 1.2rem;
+      margin-bottom: 2.5rem;
+      background: var(--paper-deep);
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--ink);
+    }
+
+    .central-block h2 {
+      font-size: 1.45rem;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--ink);
+      font-family: var(--serif);
+      font-weight: 700;
+    }
+
+    .central-block h3 {
+      font-size: 1.15rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-family: var(--serif);
+      font-weight: 700;
+    }
+
+    .central-block p {
+      margin-bottom: 1.2rem;
+      margin-top: 0;
+      font-size: 0.95rem;
+    }
+
+    /* Layout Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+      margin-bottom: 2rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .page-frame {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+      .left-meta { display: none; }
+      .back-link { margin-top: 0; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      border: 1px solid var(--muted);
+      padding: 1.2rem;
+      background: transparent;
+      box-sizing: border-box;
+    }
+
+    .card h4 {
+      margin: 0 0 0.5rem;
+      font-family: var(--serif);
+      font-size: 1rem;
+    }
+
+    .card p {
+      font-size: 0.85rem;
+      margin-bottom: 0;
+      color: var(--ink);
+    }
+
+    .chart-box {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      background: transparent;
+      border: 1px solid var(--muted);
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    /* Interactive Stepper Guide */
+    .guide-container {
+      display: flex;
+      gap: 1.5rem;
+      border: 1px solid var(--muted);
+      background: transparent;
+      margin: 2rem 0;
+    }
+
+    .guide-sidebar {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--muted);
+      min-width: 180px;
+    }
+
+    .guide-btn {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      background: none;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 0.85rem;
+      transition: all 0.15s ease-in-out;
+    }
+    .guide-btn:last-child { border-bottom: none; }
+    .guide-btn:hover { color: var(--ink); background: rgba(18, 18, 18, 0.04); }
+    .guide-btn.active {
+      color: var(--ink);
+      font-weight: bold;
+      border-left: 4px solid var(--ink);
+      background: var(--paper-deep);
+      padding-left: calc(1rem - 4px);
+    }
+
+    .guide-content {
+      flex: 2;
+      padding: 1.5rem;
+      box-sizing: border-box;
+    }
+
+    .guide-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      border: 1px solid var(--ink);
+      padding: 0.1rem 0.5rem;
+      margin-bottom: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .code-block {
+      background: rgba(18, 18, 18, 0.04);
+      color: var(--ink);
+      padding: 0.9rem;
+      border: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      white-space: pre;
+      line-height: 1.45;
+    }
+
+    /* Data Tables */
+    .systems-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.85rem;
+    }
+
+    .systems-table th, .systems-table td {
+      border: 1px solid var(--line);
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+    }
+
+    .systems-table th {
+      background: var(--paper-deep);
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    .systems-table code {
+      font-size: 0.82rem;
+      background: rgba(18, 18, 18, 0.05);
+      padding: 0.1rem 0.3rem;
+    }
+
+    /* UI Form Elements */
+    .input-box {
+      width: 100%;
+      padding: 0.8rem;
+      font-family: var(--mono);
+      border: 1px solid var(--muted);
+      background: transparent;
+      margin-bottom: 1rem;
+      resize: vertical;
+      box-sizing: border-box;
+      color: var(--ink);
+      font-size: 0.88rem;
+    }
+    .input-box:focus { outline: none; border-color: var(--ink); }
+
+    .btn {
+      background: var(--ink);
+      color: var(--paper);
+      border: 1px solid var(--ink);
+      padding: 0.6rem 1.2rem;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: transparent;
+      color: var(--ink);
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .ai-output {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-left: 3px solid var(--ink);
+      background: var(--paper-deep);
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .spinner {
+      border: 2px solid rgba(18, 18, 18, 0.2);
+      border-radius: 50%;
+      border-top: 2px solid var(--ink);
+      width: 14px;
+      height: 14px;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .footer-left {
+      grid-column: 1 / 2;
+      grid-row: 3 / 4;
+      align-self: end;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .timeline {
+      grid-column: 3 / 4;
+      grid-row: 3 / 4;
+      margin: 0;
+      justify-self: end;
+      align-self: end;
+      font-family: var(--serif);
+      font-size: clamp(1rem, 2.5vw, 1.8rem);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-frame">
+    <a href="../../" class="back-link">← Back to Portfolio</a>
+
+    <!-- Left Sticky Sidebar Meta -->
+    <aside class="left-meta">
+      <h2>SYSTEMS RESEARCH</h2>
+      <p>Bare-metal OS architecture, x86 execution model, memory virtualization, and preemptive scheduling.</p>
+      
+      <h2 style="margin-top: 1.8rem;">CORE DOMAINS</h2>
+      <div class="meta-tag-list">
+        <span class="meta-tag">x86 Assembly</span>
+        <span class="meta-tag">Freestanding C</span>
+        <span class="meta-tag">Memory Paging</span>
+        <span class="meta-tag">Interrupts / IDT</span>
+        <span class="meta-tag">Filesystem (FAT16)</span>
+        <span class="meta-tag">ELF32 Loading</span>
+      </div>
+
+      <h2 style="margin-top: 1.8rem;">ENGINEERING STATUS</h2>
+      <p style="font-size: 0.75rem;">
+        <strong>Phase 02 Completed:</strong> Real-Mode Bootloader verified at <code>0x7C00</code>.<br>
+        <strong>Active Phase 03:</strong> Multi-Sector Disk Loading via BIOS <code>INT 0x13</code>.
+      </p>
+
+      <h2 style="margin-top: 1.8rem;">REPOSITORY</h2>
+      <p style="font-size: 0.75rem;">
+        <a href="https://github.com/valvedev0/kernel" target="_blank" style="color: var(--ink); text-decoration: underline;">GitHub: SatnaOS Kernel</a>
+      </p>
+    </aside>
+
+    <!-- Main Content Column -->
+    <main class="central-block">
+
+      <header class="research-header">
+        <h1 class="research-title">Engineering SatnaOS: 32-Bit x86 Kernel from Bare Metal</h1>
+        <p class="research-meta">Systems Engineering & Low-Level Architecture · 2026</p>
+      </header>
+
+      <div class="abstract-box">
+        An in-depth systems research paper detailing the design and implementation of a 32-bit multitasking operating system kernel constructed entirely from first principles—progressing from hardware reset vector bootstrapping to protected mode, two-level 4KB paging, round-robin multitasking, and an interactive shell.
+      </div>
+
+      <!-- SECTION 1: THE BOOTSTRAPPING PARADOX -->
+      <section id="bootstrapping">
+        <h2>1. The Bootstrapping Paradox: Execution Before the OS Exists</h2>
+        <p>
+          In modern application engineering, programmers rely on an implicit safety net: the operating system provides an address space, dynamically links libraries, initializes the stack, and executes <code>main()</code>. When building an operating system, however, **there is no runtime, no virtual memory, and no library support**.
+        </p>
+        <p>
+          To maintain backward compatibility with the original 1978 Intel 8086 processor, every modern x86 CPU powers on in **16-bit Real Address Mode**. Hardware initialization proceeds through a strict chain of custody:
+        </p>
+
+        <div class="grid-3">
+          <div class="card">
+            <h4>1. Hardware Reset</h4>
+            <p>CPU registers initialize to fixed states: <code>CS = 0xF000</code>, <code>IP = 0xFFF0</code>. The processor begins execution at physical address <code>0xFFFF0</code>, jumping into BIOS ROM firmware.</p>
+          </div>
+          <div class="card">
+            <h4>2. POST & Enumerate</h4>
+            <p>The BIOS performs the Power-On Self Test, initializes motherboard chipsets, tests system RAM, and enumerates available boot media (SATA, IDE, USB).</p>
+          </div>
+          <div class="card">
+            <h4>3. Hand-off at 0x7C00</h4>
+            <p>BIOS copies the first 512-byte sector (MBR) into physical memory at address <code>0x0000:0x7C00</code>, validates the <code>0xAA55</code> magic signature, and jumps to it.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: PHYSICAL MEMORY TOPOLOGY -->
+      <section id="memory-map">
+        <h2>2. Physical Memory Topology: The First Megabyte</h2>
+        <p>
+          In 16-bit Real Mode, the processor uses 20-bit addresses ($\text{Segment} \ll 4 + \text{Offset}$), restricting physical access to exactly 1 MB ($2^{20}\text{ bytes}$). The low memory layout dictates where our kernel can safely operate without overwriting hardware dispatch tables or video buffers.
+        </p>
+
+        <table class="systems-table">
+          <thead>
+            <tr>
+              <th>Physical Address Range</th>
+              <th>Size</th>
+              <th>Purpose & Architectural Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>0x00000 - 0x003FF</code></td>
+              <td>1,024 B</td>
+              <td><strong>Interrupt Vector Table (IVT):</strong> 256 far pointers to BIOS/hardware interrupt handlers.</td>
+            </tr>
+            <tr>
+              <td><code>0x00400 - 0x004FF</code></td>
+              <td>256 B</td>
+              <td><strong>BIOS Data Area (BDA):</strong> Keyboard state, timer ticks, disk parameters.</td>
+            </tr>
+            <tr>
+              <td><code>0x00500 - 0x07BFF</code></td>
+              <td>~30 KB</td>
+              <td><strong>Conventional Free Memory:</strong> Usable bootloader workspace and stack.</td>
+            </tr>
+            <tr style="background: var(--paper-deep); font-weight: bold;">
+              <td><code>0x07C00 - 0x07DFF</code></td>
+              <td>512 B</td>
+              <td><strong>Master Boot Record (MBR):</strong> Staging area for <code>boot.bin</code>.</td>
+            </tr>
+            <tr>
+              <td><code>0x07E00 - 0x7FFFF</code></td>
+              <td>~480 KB</td>
+              <td><strong>Target Kernel Buffer:</strong> Destination area for loading multi-sector kernel code.</td>
+            </tr>
+            <tr>
+              <td><code>0xB8000 - 0xBFFFF</code></td>
+              <td>32 KB</td>
+              <td><strong>VGA Color Text Buffer:</strong> Memory-mapped display buffer (80 &times; 25 characters).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Visual Chart: Address Space Comparison -->
+        <div class="grid-2" style="margin-top: 1.5rem;">
+          <div class="chart-box">
+            <canvas id="memoryCapacityChart"></canvas>
+          </div>
+          <div>
+            <h3>Real Mode vs. Protected Mode</h3>
+            <p style="font-size: 0.88rem;">
+              The architectural gulf between Real Mode and 32-bit Protected Mode is vast. Real Mode is constrained to 1 MB with zero privilege separation. Protected Mode unlocks a 4 GB flat linear address space with two-level 4KB paging and hardware privilege isolation (Ring 0 Kernel vs. Ring 3 User).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: INTERACTIVE KERNEL BRINGUP GUIDE -->
+      <section id="interactive-guide">
+        <h2>3. Step-by-Step Kernel Bringup Pipeline</h2>
+        <p>Explore the engineering phases involved in progressing from a raw 512-byte MBR to a preemptive protected-mode kernel:</p>
+
+        <div class="guide-container">
+          <div class="guide-sidebar" id="step-buttons">
+            <!-- Buttons injected by JavaScript -->
+          </div>
+
+          <div class="guide-content">
+            <span class="guide-badge" id="guide-badge">Phase 1</span>
+            <h3 id="guide-title" style="margin-top: 0; font-family: var(--serif);">Real-Mode MBR Bootloader</h3>
+            <p id="guide-desc" style="font-size: 0.88rem; color: var(--ink);">Dissection of the 512-byte boot sector.</p>
+            
+            <div class="code-block" id="guide-code">; Loading code...</div>
+
+            <div style="margin-top: 1.2rem; display: flex; gap: 0.8rem; align-items: center;">
+              <button class="btn" id="explain-btn">
+                <span>Explain Instruction Mechanics</span>
+                <div class="spinner" id="explain-spinner"></div>
+              </button>
+            </div>
+
+            <div class="ai-output" id="explain-output"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: C++ DEVELOPER MENTAL BRIDGE -->
+      <section id="cpp-bridge">
+        <h2>4. The C++ Developer's Mental Bridge</h2>
+        <p>
+          For developers coming from an intermediate C++ background, bare-metal engineering can initially feel alien due to the absence of the standard library and runtime guarantees. However, low-level mechanics map cleanly to familiar C++ concepts:
+        </p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>Raw Pointers & Dereferencing</h4>
+            <p>Writing directly to memory-mapped hardware like the VGA buffer at <code>0xB8000</code> is identical to <code>reinterpret_cast&lt;uint8_t*&gt;(0xB8000)</code>. In assembly, brackets <code>[reg]</code> denote dereferencing.</p>
+          </div>
+          <div class="card">
+            <h4>Virtual Tables vs. The IDT</h4>
+            <p>C++ virtual method tables (<code>vptr</code>/<code>vtbl</code>) are arrays of function pointers indexed by method index. The CPU's Interrupt Descriptor Table (IDT) is literally a hardware vtable indexed by interrupt vector number.</p>
+          </div>
+          <div class="card">
+            <h4>RAII & The Call Stack</h4>
+            <p>C++ stack unwinding relies on the frame pointer (<code>EBP</code>/<code>RBP</code>) and stack pointer (<code>ESP</code>/<code>RSP</code>). Assembly requires manual management via <code>push</code>, <code>pop</code>, <code>call</code>, and <code>ret</code>.</p>
+          </div>
+          <div class="card">
+            <h4>Dynamic Allocation Without Libc</h4>
+            <p><code>new</code> and <code>delete</code> rely on OS-level <code>brk</code>/<code>mmap</code> allocators. In kernel space, we build the memory allocator (<code>kmalloc</code>/<code>kfree</code>) directly on top of 4KB physical page frames.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: INTERACTIVE SYSTEMS TUTOR -->
+      <section id="ai-tutor">
+        <h2>5. Interactive Systems Concept Analyzer</h2>
+        <p>Have questions about CPU registers, memory segmentation, or protected mode switching? Enter a systems concept or assembly instruction below for an architectural breakdown:</p>
+
+        <textarea class="input-box" id="systems-concept-input" rows="3" placeholder="e.g., Explain why the A20 gate was needed or how the GDT descriptor controls privilege rings..."></textarea>
+        
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <button class="btn" id="analyze-btn">
+            <span>Analyze Systems Concept</span>
+            <div class="spinner" id="analyze-spinner"></div>
+          </button>
+        </div>
+
+        <div class="ai-output" id="analyzer-output"></div>
+      </section>
+
+      <!-- SECTION 6: ROADMAP & FUTURE WORK -->
+      <section id="roadmap">
+        <h2>6. Project Trajectory & Ongoing Milestones</h2>
+        <p>
+          SatnaOS is engineered in 8 rigorous phases. With Phase 2 validated in QEMU, the system is advancing into multi-sector disk storage via BIOS <code>INT 0x13</code> before initializing the 32-bit Global Descriptor Table.
+        </p>
+        <p style="font-size: 0.85rem; color: var(--muted);">
+          Full technical logs, instruction decoding tables, and hardware register references are actively maintained in the project's documentation repository.
+        </p>
+      </section>
+
+    </main>
+
+    <!-- Footer Meta -->
+    <div class="footer-left">
+      <p>© 2026 Praveen Pathak. All rights reserved.</p>
+      <p><a href="https://github.com/valvedev0/kernel" target="_blank">SatnaOS Repository</a> · <a href="../../">Portfolio</a></p>
+    </div>
+
+    <div class="timeline">
+      2026
+    </div>
+  </div>
+
+  <!-- Client-Side JavaScript Logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // --- Chart.js Configuration ---
+      const rootStyle = getComputedStyle(document.body);
+      const inkColor = rootStyle.getPropertyValue('--ink').trim() || '#121212';
+      const mutedColor = rootStyle.getPropertyValue('--muted').trim() || '#6d6a5f';
+      const paperColor = rootStyle.getPropertyValue('--paper').trim() || '#fdfbe5';
+      const monoFont = rootStyle.getPropertyValue('--mono').trim() || 'Courier New, monospace';
+
+      Chart.defaults.font.family = monoFont;
+      Chart.defaults.color = mutedColor;
+
+      const memCtx = document.getElementById('memoryCapacityChart');
+      if (memCtx) {
+        new Chart(memCtx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['Real Mode (16-bit)', 'Protected Mode (32-bit)'],
+            datasets: [{
+              label: 'Addressable Memory Space',
+              data: [1, 4096], // 1 MB vs 4096 MB (4 GB)
+              backgroundColor: [mutedColor, inkColor],
+              borderRadius: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                type: 'logarithmic',
+                grid: { color: mutedColor + '22' },
+                ticks: {
+                  callback: function(value) {
+                    return value >= 1000 ? (value/1024) + ' GB' : value + ' MB';
+                  }
+                }
+              },
+              x: { grid: { display: false } }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return context.raw === 1 ? '1 MB (20-bit address bus)' : '4,096 MB / 4 GB (32-bit linear address space)';
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // --- Interactive Guide Steps Data ---
+      const kernelPhases = [
+        {
+          title: "Phase 1: Real-Mode MBR",
+          badge: "Phase 1 & 2 · Completed",
+          desc: "The 512-byte boot sector loaded at physical address 0x7C00. Uses BIOS interrupt INT 0x10 (teletype function 0x0E) to render text without drivers.",
+          code: "ORG 0x7c00\nBITS 16\n\nstart:\n    mov si, message\n    call print\n    jmp $\n\nprint:\n    mov bx, 0\n.loop:\n    lodsb             ; AL = [DS:SI], SI++\n    cmp al, 0\n    je .done\n    mov ah, 0x0e      ; BIOS teletype\n    int 0x10          ; Trigger video interrupt\n    jmp .loop\n.done:\n    ret\n\nmessage db 'Hello, World!', 0\ntimes 510 - ($ - $$) db 0\ndw 0xaa55             ; Boot signature"
+        },
+        {
+          title: "Phase 3: Multi-Sector Disk Read",
+          badge: "Phase 3 · Active Engineering",
+          desc: "The MBR is strictly limited to 512 bytes. To load the kernel, we issue BIOS INT 0x13 (Function AH=0x02) to read subsequent sectors into memory at 0x7E00.",
+          code: "mov ah, 0x02         ; Function: Read Sectors\nmov al, 1            ; Number of sectors to read\nmov ch, 0            ; Cylinder 0\nmov cl, 2            ; Sector 2 (Sector 1 is MBR)\nmov dh, 0            ; Head 0\nmov dl, 0x80         ; Drive 0x80 (First Hard Disk)\nmov bx, 0x7e00       ; Destination memory offset [ES:BX]\nint 0x13             ; Low-level disk service\njc disk_error        ; Carry Flag set = hardware failure"
+        },
+        {
+          title: "Phase 4: Protected Mode Switch",
+          badge: "Phase 4 · Architectural Blueprint",
+          desc: "Unlocking 4GB of flat memory by enabling the A20 line, constructing the Global Descriptor Table (GDT), setting CR0 Bit 0 (Protection Enable), and far jumping.",
+          code: "cli                  ; 1. Disable maskable interrupts\n; ... enable A20 line ...\nlgdt [gdt_descriptor]; 2. Load Global Descriptor Table\nmov eax, cr0\nor eax, 1\nmov cr0, eax         ; 3. Flip PE bit in Control Register 0\njmp 0x08:flush_pipe  ; 4. Far jump flushes 16-bit pipeline\n\n[BITS 32]\nflush_pipe:\n    mov ax, 0x10     ; Reload data segments with 32-bit GDT data selector\n    mov ds, ax\n    mov ss, ax"
+        },
+        {
+          title: "Phase 5: Two-Level 4KB Paging",
+          badge: "Phase 5 · Architectural Blueprint",
+          desc: "Implementing hardware virtual memory. A Page Directory contains 1024 Directory Entries, each pointing to a Page Table with 1024 Page Entries pointing to 4KB frames.",
+          code: "// C Kernel Paging Setup\nuint32_t page_directory[1024] __attribute__((aligned(4096)));\nuint32_t first_page_table[1024] __attribute__((aligned(4096)));\n\n// Identity map first 4 MB\nfor (int i = 0; i < 1024; i++) {\n    first_page_table[i] = (i * 0x1000) | 3; // Supervisor, Read/Write, Present\n}\npage_directory[0] = ((uint32_t)first_page_table) | 3;\n\n// Load CR3 register and enable paging in CR0 (bit 31)\nload_page_directory(page_directory);\nenable_paging();"
+        }
+      ];
+
+      const btnContainer = document.getElementById('step-buttons');
+      const uiBadge = document.getElementById('guide-badge');
+      const uiTitle = document.getElementById('guide-title');
+      const uiDesc = document.getElementById('guide-desc');
+      const uiCode = document.getElementById('guide-code');
+
+      function updateGuide(index) {
+        document.querySelectorAll('.guide-btn').forEach((btn, i) => {
+          btn.classList.toggle('active', i === index);
+        });
+
+        const data = kernelPhases[index];
+        uiBadge.textContent = data.badge;
+        uiTitle.textContent = data.title;
+        uiDesc.textContent = data.desc;
+        uiCode.textContent = data.code;
+        
+        const explainBox = document.getElementById('explain-output');
+        explainBox.style.display = 'none';
+        explainBox.innerHTML = '';
+      }
+
+      kernelPhases.forEach((phase, index) => {
+        const btn = document.createElement('button');
+        btn.className = `guide-btn`;
+        btn.textContent = phase.title;
+        btn.onclick = () => updateGuide(index);
+        btnContainer.appendChild(btn);
+      });
+
+      updateGuide(0);
+
+      // --- Gemini Integration using existing /api/gemini endpoint ---
+      const geminiEndpoint = "/api/gemini";
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      async function callGemini(prompt, systemInstruction) {
+        const payload = { prompt, systemInstruction };
+        const delays = [1000, 2000, 4000];
+        
+        for (let i = 0; i < 3; i++) {
+          try {
+            const response = await fetch(geminiEndpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+              let msg = `HTTP ${response.status}`;
+              try {
+                const err = await response.json();
+                msg = err.error || err.message || msg;
+              } catch {
+                const text = await response.text();
+                if (text) msg = text;
+              }
+              if (response.status === 404) {
+                msg = "The /api/gemini endpoint was not found on this host. Run via `vercel dev` locally or test on your deployed Vercel domain.";
+              }
+              throw new Error(msg);
+            }
+
+            const data = await response.json();
+            return data.text ? data.text.trim() : "<p>No response generated.</p>";
+          } catch (error) {
+            if (i === 2) {
+              return `<p style="color: #b00020;">Request failed: ${escapeHtml(error.message || "Unknown error")}</p>`;
+            }
+            await new Promise(r => setTimeout(r, delays[i]));
+          }
+        }
+      }
+
+      // Step Instruction Explainer Button
+      const explainBtn = document.getElementById('explain-btn');
+      const explainSpinner = document.getElementById('explain-spinner');
+      const explainOutput = document.getElementById('explain-output');
+
+      explainBtn.addEventListener('click', async () => {
+        explainBtn.disabled = true;
+        explainSpinner.style.display = 'inline-block';
+        explainOutput.style.display = 'none';
+
+        const phaseTitle = uiTitle.textContent;
+        const codeText = uiCode.textContent;
+
+        const sysPrompt = "You are an expert operating systems engineer and C++ developer tutor. Explain the provided assembly or kernel C code snippet to an intermediate systems programmer. Focus on what happens at the hardware register and CPU execution level. Format strictly using clean HTML <p>, <ul>, <li>, and <code> tags. Do not use Markdown.";
+        const response = await callGemini(`Explain this kernel bringup stage: ${phaseTitle}\nCode:\n${codeText}`, sysPrompt);
+
+        explainOutput.innerHTML = response;
+        explainOutput.style.display = 'block';
+
+        explainBtn.disabled = false;
+        explainSpinner.style.display = 'none';
+      });
+
+      // General Systems Concept Analyzer
+      const analyzeBtn = document.getElementById('analyze-btn');
+      const analyzeSpinner = document.getElementById('analyze-spinner');
+      const analyzerOutput = document.getElementById('analyzer-output');
+
+      analyzeBtn.addEventListener('click', async () => {
+        const query = document.getElementById('systems-concept-input').value.trim();
+        if (!query) return;
+
+        analyzeBtn.disabled = true;
+        analyzeSpinner.style.display = 'inline-block';
+        analyzerOutput.style.display = 'none';
+
+        const sysPrompt = "You are a bare-metal kernel architect. Explain the requested systems concept (x86 registers, A20, GDT, paging, interrupts, or CPU privilege rings) with depth and technical rigor, highlighting implications for C++ systems programmers. Format strictly using clean HTML <p>, <ul>, <li>, and <code> tags. Do not use Markdown.";
+        const response = await callGemini(`Systems concept question: "${query}"`, sysPrompt);
+
+        analyzerOutput.innerHTML = response;
+        analyzerOutput.style.display = 'block';
+
+        analyzeBtn.disabled = false;
+        analyzeSpinner.style.display = 'none';
+      });
+
+    });
+  </script>
+</body>
+</html>
+
