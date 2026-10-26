@@ -20,83 +20,35 @@
       <h2>CORE STACK</h2>
       <p>C++ / Python / JavaScript / GLSL / Unreal / WebAssembly</p>
       <h2>CURRENTLY</h2>
-      <p>Working at Electronic Arts, building software across game technology and interactive systems.</p>
+      <p>Working at Electronic Arts on game technology and interactive systems.</p>
       <h2>GRAPHICS</h2>
-      <p>OpenGL / Vulkan / DX12 / Raylib / real-time rendering pipelines</p>
+      <p>OpenGL / Vulkan / DX12 / Raylib / real-time rendering</p>
       <h2>EMBEDDED</h2>
-      <p>STM32 / ESP32 / FreeRTOS / PlatformIO / Zephyr / UART / SPI / I2C / edge-AI experiments</p>
-      <h2>ADDING NEXT</h2>
-      <p>More embedded sims, firmware notes, and AI-on-hardware guides alongside the browser work.</p>
+      <p>STM32 / ESP32 / FreeRTOS / firmware experiments</p>
     </aside>
 
     <main class="central-block">
       <p class="section-kicker">PRAVEEN PATHAK / GAME DEV / GRAPHICS / SOFTWARE / EMBEDDED</p>
       <h2 class="massive-title">C++ graphics,<br>sims, and embedded builds</h2>
       <p class="hero-note">
-        I am currently working at Electronic Arts, and I build interactive systems across game dev,
-        rendering, browser-native simulation, and
-        embedded software. This site currently collects C++, Python, JavaScript, Raylib,
-        OpenGL/Vulkan/DX12, and WebAssembly work, and it will keep growing with embedded guides,
-        firmware experiments, and AI running closer to hardware.
+        I like building systems that sit close to the metal: OS work, kernel experiments, low-level
+        tooling, and the kind of engineering that turns hardware constraints into something practical.
+        This site keeps the focus on the work that actually matters in that space.
       </p>
 
       <div class="hero-actions" aria-label="Primary portfolio actions">
-        <a class="action-link" href="cpp_sims/simulations.html" target="_blank" rel="noreferrer">Launch C++ Sims</a>
-        <a class="action-link" href="python_sims/index.html" target="_blank" rel="noreferrer">Launch Python Sims</a>
-        <a class="action-link action-link-secondary" href="research/bridging-mobile-gap/">AI Docs + Research</a>
+        <a class="action-link" href="simulations/">Open simulations library</a>
+        <a class="action-link" href="research/">Browse research archive</a>
         <a class="action-link action-link-secondary" href="https://github.com/valvedev0" target="_blank" rel="noreferrer">Open GitHub</a>
       </div>
 
-      <section class="spotlight-grid" aria-label="Primary portfolio entry points">
-        <article class="spotlight-card spotlight-card-launch">
-          <p class="card-kicker">C++ / RAYLIB / WASM</p>
-          <h3>Launch the native-style browser build</h3>
-          <p>
-            Open interactive C++ simulations compiled with Emscripten and test the real runtime in
-            the browser.
-          </p>
-          <a class="arrow-link" href="cpp_sims/simulations.html" target="_blank" rel="noreferrer">Run C++ simulation</a>
-        </article>
-        <article class="spotlight-card spotlight-card-launch">
-          <p class="card-kicker">PYTHON / PYGAME</p>
-          <h3>Open the Python simulation suite</h3>
-          <p>
-            Explore agent behavior, optical systems, and interactive scenarios packaged for the
-            web.
-          </p>
-          <a class="arrow-link" href="python_sims/index.html" target="_blank" rel="noreferrer">Run Python simulations</a>
-        </article>
-        <article class="spotlight-card spotlight-card-launch">
-          <p class="card-kicker">EMBEDDED / AI / GUIDES</p>
-          <h3>AI-assisted docs and upcoming embedded notes</h3>
-          <p>
-            Browse the current AI-enhanced docs now, and expect upcoming guides around
-            microcontrollers, sensor interfaces, RTOS workflows, and AI on edge hardware.
-          </p>
-          <a class="arrow-link" href="research/bridging-mobile-gap/">Open AI docs</a>
-        </article>
-      </section>
-
       <section class="content-section" id="projects">
         <div class="section-heading">
-          <p class="section-kicker">OPEN PROJECTS</p>
-          <h3 class="section-title">Launch the interactive work immediately</h3>
+          <p class="section-kicker">FEATURED WORK</p>
+          <h3 class="section-title">Selected projects and technical entries</h3>
           <p class="supporting-copy">
-            Each entry below is a direct route into a runnable artifact or technical breakdown, and
-            the repos are open too. If you want to add features, improve systems, or build new
-            sims on top of the playground, jump into the source.
+            Each card links to either a live project, a research write-up, or the source repository behind it.
           </p>
-        </div>
-
-        <div class="detail-grid">
-          <article class="detail-card">
-            <h4>Electronic Arts</h4>
-            <p>
-              Currently working at Electronic Arts, contributing to software and interactive
-              technology in the games space while continuing to explore graphics, simulation, and
-              systems programming.
-            </p>
-          </article>
         </div>
 
         <div class="project-grid">
@@ -104,9 +56,8 @@
             <p class="card-kicker">C / X86 ASSEMBLY / SYSTEMS ARCHITECTURE</p>
             <h4>SatnaOS: 32-Bit Multitasking Kernel</h4>
             <p class="project-summary">
-              A bare-metal operating system kernel engineered from first principles. Progresses from 16-bit MBR
-              bootstrapping to 32-bit protected mode, two-level 4KB paging, preemptive timer-based multitasking,
-              and a custom VFS/FAT16 storage architecture.
+              Bare-metal kernel work spanning bootstrap, protected mode, paging, task scheduling, and
+              custom storage design.
             </p>
             <div class="card-tags" aria-label="Operating system technologies">
               <span>x86 Assembly</span>
@@ -120,12 +71,12 @@
             </div>
           </article>
 
-          <article class="project-card project-card-featured">
+          <article class="project-card">
             <p class="card-kicker">C++ / RAYLIB / WASM</p>
             <h4>Interactive C++ Simulations</h4>
             <p class="project-summary">
-              Physics and agent-based simulations delivered through WebAssembly, keeping the C++
-              workflow intact while exposing the runtime directly in the browser.
+              Physics and agent-based simulations, exposed in-browser while preserving the native C++
+              workflow and runtime behavior.
             </p>
             <div class="card-tags" aria-label="C++ simulation categories">
               <span>Fluid Dynamics</span>
@@ -133,7 +84,7 @@
               <span>Ant Foraging</span>
             </div>
             <div class="project-actions">
-              <a class="arrow-link" href="cpp_sims/simulations.html" target="_blank" rel="noreferrer">Run live simulation</a>
+              <a class="arrow-link" href="cpp_sims/simulations.html" target="_blank" rel="noreferrer">Open C++ sim suite</a>
               <a class="arrow-link" href="https://github.com/valvedev0/simulations/tree/feature/wasm-port/cpp" target="_blank" rel="noreferrer">View C++ source</a>
             </div>
           </article>
@@ -142,8 +93,8 @@
             <p class="card-kicker">PYTHON / JAVASCRIPT / WEB PLAYGROUND</p>
             <h4>Python + Laser Sims Playground</h4>
             <p class="project-summary">
-              A mixed sandbox of browser experiments: some pieces are Python-driven, while the
-              currently active Laser Sims experience is built in JavaScript for instant interaction.
+              A browser-first playground mixing Python experiments with interactive JavaScript-based
+              systems for optics, control, and simulation behavior.
             </p>
             <div class="card-tags" aria-label="Python simulation categories">
               <span>Python experiments</span>
@@ -158,111 +109,16 @@
 
           <article class="project-card">
             <p class="card-kicker">RESEARCH / EMBEDDED / AI</p>
-            <h4>AI Docs + Embedded Guides In Progress</h4>
+            <h4>AI Docs + Embedded Guides</h4>
             <p class="project-summary">
-              Technical notes on C++ and Raylib are already live, and this section will expand with
-              embedded systems guides covering firmware workflows, MCU bring-up, and AI closer to
-              the hardware layer.
+              Technical notes, platform analysis, and embedded-system references that expand into AI and
+              hardware-aware workflows.
             </p>
             <div class="project-actions">
-              <a class="arrow-link" href="research/bridging-mobile-gap/">Open AI docs</a>
-              <a class="arrow-link" href="https://github.com/valvedev0" target="_blank" rel="noreferrer">Browse GitHub profile</a>
+              <a class="arrow-link" href="research/">Open research archive</a>
+              <a class="arrow-link" href="https://github.com/valvedev0" target="_blank" rel="noreferrer">Browse GitHub</a>
             </div>
           </article>
-        </div>
-      </section>
-
-      <section class="content-section" id="skills">
-        <div class="section-heading">
-          <p class="section-kicker">INSIDE THE PLAYGROUND</p>
-          <h3 class="section-title">Graphics, code, firmware, and side quests</h3>
-          <p class="supporting-copy">
-            This is the part of the site where the interests collide: game dev, rendering,
-            simulation, software tooling, embedded systems, and experiments around putting AI into
-            hardware and edge devices.
-          </p>
-        </div>
-
-        <div class="skill-cloud" aria-label="Skill snapshot">
-          <span class="skill-pill">C++ experiments</span>
-          <span class="skill-pill">graphics API curiosity</span>
-          <span class="skill-pill">physics doodling</span>
-          <span class="skill-pill">Raylib workflows</span>
-          <span class="skill-pill">OpenGL / Vulkan / DX12</span>
-          <span class="skill-pill">WebAssembly ports</span>
-          <span class="skill-pill">AI-assisted docs</span>
-          <span class="skill-pill">browser playtests</span>
-          <span class="skill-pill">STM32 / ESP32</span>
-          <span class="skill-pill">FreeRTOS</span>
-          <span class="skill-pill">PlatformIO / Zephyr</span>
-          <span class="skill-pill">UART / SPI / I2C</span>
-          <span class="skill-pill">sensor interfaces</span>
-          <span class="skill-pill">TensorFlow Lite Micro</span>
-          <span class="skill-pill">CMSIS / embedded debugging</span>
-        </div>
-
-        <div class="detail-grid">
-          <article class="detail-card">
-            <h4>Graphics rabbit holes</h4>
-            <p>
-              A lot of this site comes from chasing rendering questions: how things move, how they
-              feel, how much control the low-level pipeline gives back, and what breaks in
-              interesting ways when pushed.
-            </p>
-          </article>
-          <article class="detail-card">
-            <h4>Sim ideas in motion</h4>
-            <p>
-              The simulations are where ideas get stress-tested. Motion, agents, optics, controls,
-              and tiny rule systems all become easier to understand once they can be poked live.
-            </p>
-          </article>
-          <article class="detail-card">
-            <h4>Embedded tinkering</h4>
-            <p>
-              I am also working deeper into embedded systems: microcontrollers, firmware loops,
-              communication buses, sensors, and edge-AI setups where software starts touching the
-              board directly.
-            </p>
-          </article>
-          <article class="detail-card">
-            <h4>Docs that do more than explain</h4>
-            <p>
-              The research pages are meant to be explored like tools, not read like static notes,
-              which is why I like mixing technical writing with AI-enabled helpers, interactive
-              examples, and future embedded walkthroughs.
-            </p>
-          </article>
-        </div>
-
-        <div class="contrib-note">
-          <h4>Open source playground</h4>
-          <p>
-            The code behind these projects is open source. If you are a dev who wants to add a new
-            simulation, improve an existing mechanic, or wire up extra features, feel free to dive
-            into the repos and contribute.
-          </p>
-          <div class="project-actions">
-            <a class="arrow-link" href="https://github.com/valvedev0/simulations/tree/feature/wasm-port/cpp" target="_blank" rel="noreferrer">Contribute to C++ sims</a>
-            <a class="arrow-link" href="https://github.com/valvedev0/simulations/tree/feature/wasm-port/python" target="_blank" rel="noreferrer">Contribute to Python / JS sims</a>
-            <a class="arrow-link" href="https://github.com/valvedev0" target="_blank" rel="noreferrer">Explore all repos</a>
-          </div>
-        </div>
-      </section>
-
-      <section class="content-section" id="research">
-        <div class="section-heading">
-          <p class="section-kicker">RESEARCH</p>
-          <h3 class="section-title">Browse the technical write-ups</h3>
-          <p class="supporting-copy">
-            Each project below explores a different layer of systems work, from embedded AI guidance to
-            operating-system architecture and kernel-level design.
-          </p>
-        </div>
-
-        <div class="research-actions" aria-label="Research projects">
-          <a class="action-link" href="research/bridging-mobile-gap/">Bridging the Mobile Gap</a>
-          <a class="action-link action-link-secondary" href="research/satnaos-kernel/">SatnaOS Kernel</a>
         </div>
       </section>
     </main>
